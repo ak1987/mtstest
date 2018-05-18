@@ -2,9 +2,24 @@
     <a href="https://github.com/yiisoft" target="_blank">
         <img src="https://avatars0.githubusercontent.com/u/993323" height="100px">
     </a>
-    <h1 align="center">Yii 2 Basic Project Template</h1>
+    <h1 align="center">Chat based on Yii 2 Basic Project Template</h1>
     <br>
 </p>
+
+<p>
+Application requires standard LAMP server: apache2 wrbserver and php >7.0 and MySQL - like database.
+
+Clone project to your `/var/www/project` directory.
+
+Add project settings at your apache2 configuration, `/etc/hosts` and initiate with `a2ensite project.conf` command.
+
+Reload apache with `service apache2 reload` command
+
+
+
+</p>
+
+<h2>About Yii2 basic template</h2>
 
 Yii 2 Basic Project Template is a skeleton [Yii 2](http://www.yiiframework.com/) application best for
 rapidly creating small projects.
