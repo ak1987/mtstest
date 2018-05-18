@@ -15,7 +15,9 @@ Add project settings at your apache2 configuration, `/etc/hosts` and initiate wi
 
 Reload apache with `service apache2 reload` command
 
+Add database config to /config/db.php
 
+Import `sql1.sql` and `sql2.sql` files to your database.
 
 </p>
 
