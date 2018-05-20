@@ -42,6 +42,9 @@ $config = [
                 ],
             ],
         ],
+        'assetManager' => [
+            'linkAssets' => true,
+        ],
         'db' => $db,
         'urlManager' => [
             'enablePrettyUrl' => true,
