@@ -1,0 +1,41 @@
+#chat-window {
+
+}
+
+#chat-messages {
+    border-radius: 4px;
+    border: 1px solid black;
+    height: 400px;
+    margin-bottom: 20px;
+    overflow-y: scroll;
+    padding: 20px;
+}
+
+.chat-message-header {
+    font-size: 11px;
+    font-weight: bold;
+}
+
+.chat-message {
+    border-radius: 4px;
+    background: #ccc;
+    padding: 10px;
+    margin-bottom: 10px;
+}
+
+.chat-message-service {
+    background: #00CCFF !important;
+}
+
+.chat-message:nth-child(even) {
+    background: #eee;
+}
+
+#chat-controls {
+
+}
+
+#chat-new-message {
+    width: 100%;
+    resize: none;
+}
