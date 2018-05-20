@@ -74,4 +74,14 @@ class Users extends \yii\db\ActiveRecord
              return false;
          }
     }
+
+    public static function getUserByToken($token)
+    {
+        $user = self::find()->where(['token' => $token])->one();
+        if ($user) {
+            return $user;
+        } else {
+            return false;
+        }
+    }
 }
