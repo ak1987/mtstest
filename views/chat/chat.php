@@ -19,7 +19,7 @@ ChatAsset::register($this);
                 </div>
                 <div class="chat-message chat-message-service">
                     <div class="chat-message-header">
-                        2018-01-01 16:22:22 | Вася is now <span class="label label-danger">online</span>
+                        <span class="label label-danger">Вася is now offline</span>
                     </div>
                 </div>
                 <div class="chat-message">
@@ -40,7 +40,7 @@ ChatAsset::register($this);
                 </div>
                 <div class="chat-message chat-message-service">
                     <div class="chat-message-header">
-                        2018-01-01 16:22:22 | Вася is now <span class="label label-success">offline</span>
+                        <span class="label label-success">Вася is now online</span>
                     </div>
                 </div>
                 <div class="chat-message">
@@ -53,7 +53,7 @@ ChatAsset::register($this);
                 </div>
             </div>
             <div id="chat-controls">
-                <textarea name="" id="chat-new-message" rows="10"></textarea>
+                <textarea id="chat-new-message" rows="10"></textarea>
                 <button id="send-new-message" class="btn btn-primary">Send Message</button>
             </div>
         </div>
@@ -62,17 +62,7 @@ ChatAsset::register($this);
         <div id="user-list">
             <ul>
                 <li>
-                    <span class="label label-default">
-                        Вася
-                    </span>
-                </li>
-                <li>
-                    <span class="label label-default">
-                        Василий Петрович
-                    </span>
-                </li>
-                <li>
-                    <span class="label label-default">
+                    <span class="label label-default" id="chat-user-2">
                         Вася
                     </span>
                 </li>

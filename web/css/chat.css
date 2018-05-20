@@ -16,15 +16,11 @@
     font-weight: bold;
 }
 
-.chat-message {
+.chat-message, .chat-message-service {
     border-radius: 4px;
     background: #ccc;
     padding: 10px;
     margin-bottom: 10px;
-}
-
-.chat-message-service {
-    background: #00CCFF !important;
 }
 
 .chat-message:nth-child(even) {
