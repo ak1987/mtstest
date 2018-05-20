@@ -2,13 +2,8 @@
 
 namespace app\controllers;
 
-use Yii;
-use yii\filters\AccessControl;
 use yii\web\Controller;
-use yii\web\Response;
-use yii\filters\VerbFilter;
-use app\models\LoginForm;
-use app\models\ContactForm;
+use yii\web\NotFoundHttpException;
 
 class ChatController extends Controller
 {
@@ -41,8 +36,13 @@ class ChatController extends Controller
      *
      * @return string
      */
-    public function actionIndex()
+    public function actionIndex($id = null)
     {
-        return $this->render('index');
+        if($id) {
+            if(intval($id) != $id) throw new NotFoundHttpException();
+            return $this->render('chat', ['chat_id'=>'id']);
+        } else {
+            return $this->render('index');
+        }
     }
 }
