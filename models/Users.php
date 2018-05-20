@@ -62,4 +62,16 @@ class Users extends \yii\db\ActiveRecord
     {
         return $this->hasMany(Messages::className(), ['user_id' => 'id']);
     }
+
+    /**
+     * @return boolean
+     */
+    public static function checkToken($token)
+    {
+         if (self::find()->where(['token' => $token])->one()) {
+             return true;
+         } else {
+             return false;
+         }
+    }
 }
