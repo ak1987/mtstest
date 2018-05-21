@@ -53,6 +53,7 @@ ChatAsset::register($this);
                 </div>
             </div>
             <div id="chat-controls">
+                <input type="hidden" id="chat-id" value="<?= $chatId ?>">
                 <textarea id="chat-new-message" rows="10"></textarea>
                 <button id="send-new-message" class="btn btn-primary">Send Message</button>
             </div>
