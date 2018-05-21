@@ -33,7 +33,14 @@ $().ready(function () {
 
         socket.onmessage = function (e) {
             var response = JSON.parse(e.data);
-            $('#chat-messages').append(renderMsg(response.user_name, response.message, response.date, response.user_id));
+            switch (response.type) {
+                case 'message':
+                    $('#chat-messages').append(renderMsg(response.user_name, response.message, response.date, response.user_id));
+                    break;
+                case 'service':
+                    $('#chat-messages').append(renderServiceMsg(response.message, response.date));
+                    break;
+            }
         };
     }
 
@@ -42,9 +49,11 @@ $().ready(function () {
     }
 
     function renderMsg(author, message, date, userId) {
-        var html;
-        html = '<div class="chat-message"><div class="chat-message-header">' + date + ' | ' + author + ': </div><div class="chat-message-body">' + message + '</div></div>';
-        return html;
+        return ('<div class="chat-message"><div class="chat-message-header">' + date + ' | ' + author + ': </div><div class="chat-message-body">' + message + '</div></div>');
+    }
+
+    function renderServiceMsg(message, date) {
+        return ('<div class="chat-message chat-message-service"><div class="chat-message-header">' + date + ' | ' + message + '</div></div>');
     }
 
     function getChatToken(token, chatId) {
