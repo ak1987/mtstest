@@ -7,7 +7,16 @@ $().ready(function () {
 
     // getting chat token & launching socket
 
+    // SYNCHRONOUS REQUESTS
+
     getChatToken(123, chatId);
+
+    getChatMessages(chatId);
+
+    if (chatToken) {
+        // as soon as token received - we initiate socket opening
+        socketInit();
+    }
 
     $('#send-new-message').on('click', function () {
         var message = $('#chat-new-message').val();
@@ -39,12 +48,29 @@ $().ready(function () {
     }
 
     function getChatToken(token, chatId) {
-        var token = 123;
         // getting required chat room token by user token
-        $.getJSON('/chat/create-chat-session', {'token': token, 'chat_id': chatId}, function (response) {
-            chatToken = response.token;
-            // as soon as token received - we initiate socket opening
-            socketInit();
+        $.ajax({
+            url: '/chat/create-chat-session',
+            data: {'token': token, 'chat_id': chatId},
+            success: function (result) {
+                chatToken = result.token;
+            },
+            async: false
+        });
+    }
+
+    function getChatMessages(chatId) {
+        // getting required chat messages
+        $.ajax({
+            url: '/chat/messages/' + chatId,
+            success: function (result) {
+                var html = '';
+                result.forEach(function (item, i) {
+                    html += renderMsg(item.user_name, item.text, item.datetime, item.user_id);
+                });
+                $('#chat-messages').append(html);
+            },
+            async: false
         });
     }
 
