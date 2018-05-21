@@ -50,10 +50,20 @@ class ChatController extends Controller
         }
     }
 
-    public function actionMessages($id) {
+    public function actionMessages($id)
+    {
         \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
-        $messages = Messages::find()->where(['chat_id'=>$id])->all();
-        return $messages;
+        $response = [];
+        $messages = Messages::find()->with('user')->where(['chat_id' => $id])->orderBy('datetime',SORT_ASC)->all();
+        foreach ($messages as $message) {
+            $response[] = [
+                'user_id' => $message->user->id,
+                'user_name' => $message->user->name,
+                'datetime' => $message->datetime,
+                'text' => $message->text
+            ];
+        }
+        return $response;
     }
 
     public function actionCreateChatSession()
