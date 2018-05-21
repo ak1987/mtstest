@@ -2,6 +2,7 @@
 
 namespace app\controllers;
 
+use app\models\Messages;
 use Yii;
 use app\models\ChatSessions;
 use app\models\Users;
@@ -47,6 +48,12 @@ class ChatController extends Controller
         } else {
             return $this->render('index');
         }
+    }
+
+    public function actionMessages($id) {
+        \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+        $messages = Messages::find()->where(['chat_id'=>$id])->all();
+        return $messages;
     }
 
     public function actionCreateChatSession()
