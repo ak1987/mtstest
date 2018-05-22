@@ -58,7 +58,7 @@ $().ready(function () {
     }
 
     function sendMessage(messageText) {
-        socket.send(JSON.stringify({'action': 'msg', 'msg': messageText}));
+        if(messageText.trim()) socket.send(JSON.stringify({'action': 'msg', 'msg': messageText}));
     }
 
     function renderMsg(author, message, date, userId) {
