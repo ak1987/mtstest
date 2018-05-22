@@ -8,6 +8,7 @@ use app\models\ChatSessions;
 use app\models\Users;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
+use app\models\RegisterForm;
 
 class ChatController extends Controller
 {
@@ -46,8 +47,30 @@ class ChatController extends Controller
             if (intval($id) != $id) throw new NotFoundHttpException();
             return $this->render('chat', ['chatId' => $id]);
         } else {
-            return $this->render('index');
+            $token =  Yii::$app->request->cookies->getValue('token');
+            if($token && Users::getUserByToken($token)) {
+                return $this->render('index');
+            } else {
+                return $this->redirect(['chat/register']);
+            }
         }
+    }
+
+    public function actionRegister() {
+        $model = new RegisterForm();
+        if ($model->load(Yii::$app->request->post()) && $model->validate()) {
+            $user = new Users();
+            $user->name = $model->username;
+            $user->token = Yii::$app->getSecurity()->generateRandomString(32);
+            $user->save();
+            Yii::$app->response->cookies->add(new \yii\web\Cookie([
+                'name' => 'token',
+                'value' => $user->token
+            ]));
+        }
+        return $this->render('register', [
+            'model' => $model,
+        ]);
     }
 
     public function actionMessages($id)
