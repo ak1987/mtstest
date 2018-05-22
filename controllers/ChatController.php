@@ -43,16 +43,16 @@ class ChatController extends Controller
      */
     public function actionIndex($id = null)
     {
+        $token =  Yii::$app->request->cookies->getValue('token');
+        if(!$token || !Users::getUserByToken($token)) {
+            return $this->redirect(['chat/register']);
+        }
+
         if ($id) {
             if (intval($id) != $id) throw new NotFoundHttpException();
             return $this->render('chat', ['chatId' => $id]);
         } else {
-            $token =  Yii::$app->request->cookies->getValue('token');
-            if($token && Users::getUserByToken($token)) {
-                return $this->render('index');
-            } else {
-                return $this->redirect(['chat/register']);
-            }
+            return $this->render('index');
         }
     }
 
@@ -67,6 +67,7 @@ class ChatController extends Controller
                 'name' => 'token',
                 'value' => $user->token
             ]));
+            return $this->redirect(['chat/index']);
         }
         return $this->render('register', [
             'model' => $model,
