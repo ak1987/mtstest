@@ -98,6 +98,7 @@ class ChatController extends Controller
 
         $token = Yii::$app->request->get('token');
         $chatId = Yii::$app->request->get('chat_id');
+        if ($chatId == 0) return false;
         $user = Users::getUserByToken($token);
         if ($user) {
             $hash = Yii::$app->getSecurity()->generateRandomString(32);

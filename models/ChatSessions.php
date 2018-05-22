@@ -58,4 +58,14 @@ class ChatSessions extends \yii\db\ActiveRecord
     {
         return $this->hasOne(Users::className(), ['id' => 'user_id']);
     }
+
+    public static function addAdminSession() {
+        $session = new ChatSessions();
+        $session->id = Yii::$app->getSecurity()->generateRandomString(32);
+        $session->user_id = 1;
+        $session->chat_id = 0;
+        $session->is_active = 1;
+        $session->save();
+        return($session->id);
+    }
 }

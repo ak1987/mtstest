@@ -12,6 +12,7 @@ class SocketServer implements MessageComponentInterface
 {
     protected $clients; // connections array, client has user_id and chat_id
     protected $chats; // chats array, chats have chat_id that have user_id that have connections
+    protected $adminClients; // handling admin connections
 
     public function onOpen(ConnectionInterface $conn)
     {
@@ -42,6 +43,7 @@ class SocketServer implements MessageComponentInterface
                             'user_name' => $userName,
                         ]);
                         $this->chatBroadCast($chatId, $messageArray);
+                        $this->adminBroadCast($userId, $userName, $chatId, 1);
                     }
                     // adding connection information to clients array
                     $this->clients[$connId]['user_id'] = $userId;
@@ -76,6 +78,71 @@ class SocketServer implements MessageComponentInterface
                 // sending messages
                 $this->chatBroadCast($chatId, $messageArray);
                 break;
+            case 'adm-auth':
+                $chatToken = $data['chat_token'];
+                $chatSession = ChatSessions::find()->where(['id' => $chatToken, 'chat_id' => 0])->one();
+                if ($chatSession) {
+                    $this->clients[$connId]['admin'] = true;
+                    $this->adminClients[] = $connId;
+                }
+                break;
+            case 'remove-user':
+                if (isset($this->clients[$connId]['admin']) && $this->clients[$connId]['admin']) {
+                    $userId = $data['user_id'];
+                    $chatId = $data['chat_id'];
+                    // terminate user connection
+                    if (isset($this->chats[$chatId][$userId]) && $userConnections = $this->chats[$chatId][$userId]) {
+                        $messageArray = json_encode([
+                            'type' => 'termination',
+                        ]);
+                        foreach ($userConnections as $key => $userConnection) {
+                            $this->clients[$key]['conn']->send($messageArray);
+                        }
+                    }
+                }
+                break;
+            case 'get-user-list':
+                $list = [];
+                $userIds = [];
+                //$this->chats[$chatId][$userId][$connId]
+                if (isset($this->chats) && count($this->chats) > 0) {
+                    foreach ($this->chats as $chatId => $connections) {
+                        foreach ($connections as $userId => $connection) {
+                            $list[$chatId][] = $userId;
+                            $userIds[] = $userId;
+                        }
+                    }
+                }
+                $userIds = array_unique($userIds);
+                $userNames = Users::find()->where(['in', 'id', $userIds])->asArray()->all();
+
+                $namesArray = [];
+                foreach ($userNames as $userName) {
+                    $namesArray[$userName['id']] = $userName['name'];
+                }
+
+                //var_dump($userNames);
+                //var_dump($list);
+
+                // mapping
+
+                $data = [];
+
+                if (count($list) > 0 && count($userNames) > 0) {
+                    foreach ($list as $chatId => $item) {
+                        foreach ($item as $user) {
+                            $data[$chatId][$userId] = $namesArray[$userId];
+                        }
+                    }
+                }
+
+                $messageArray = json_encode([
+                    'type' => 'user_list',
+                    'data' => $data,
+                ]);
+
+                $this->clients[$connId]['conn']->send($messageArray);
+                break;
         }
     }
 
@@ -86,19 +153,25 @@ class SocketServer implements MessageComponentInterface
         $chatId = $this->clients[$connId]['chat_id'];
         unset($this->clients[$connId]);
         unset($this->chats[$chatId][$userId][$connId]);
-        if (!$this->checkUserChatPresence($userId, $chatId)) {
-            $userName = Users::findOne($userId)->name;
-            $messageText = "User $userName is now <span class='label label-danger'>offline</span>";
-            $messageArray = json_encode([
-                'type' => 'service',
-                'message' => html_entity_decode($messageText),
-                'user_id' => $userId,
-                'date' => date('Y-m-d H:i:s'),
-                'user_name' => $userName,
-            ]);
+        // if admin
+        if ($chatId == 0) {
+            if (isset($this->adminClients[$connId])) unset($this->adminClients[$connId]);
+        } else {
+            if (!$this->checkUserChatPresence($userId, $chatId)) {
+                $userName = Users::findOne($userId)->name;
+                $messageText = "User $userName is now <span class='label label-danger'>offline</span>";
+                $messageArray = json_encode([
+                    'type' => 'service',
+                    'message' => html_entity_decode($messageText),
+                    'user_id' => $userId,
+                    'date' => date('Y-m-d H:i:s'),
+                    'user_name' => $userName,
+                ]);
 
-            // sending messages
-            $this->chatBroadCast($chatId, $messageArray);
+                // sending messages
+                $this->chatBroadCast($chatId, $messageArray);
+                $this->adminBroadCast($userId, $userName, $chatId, 0);
+            }
         }
         echo "Connection {$connId} has disconnected\n";
     }
@@ -109,12 +182,30 @@ class SocketServer implements MessageComponentInterface
         $conn->close();
     }
 
+    protected function adminBroadCast($userId, $userName, $chatId, $status)
+    {
+        if (isset($this->adminClients) && is_array($this->adminClients) && count($this->adminClients) > 0) {
+            // admin broadcast
+            $messageArray = json_encode([
+                'type' => 'service',
+                'user_id' => $userId,
+                'chat_id' => $chatId,
+                'user_name' => $userName,
+                'action' => $status
+            ]);
+
+            foreach ($this->adminClients as $connId) {
+                @$this->clients[$connId]['conn']->send($messageArray);
+            }
+        }
+    }
+
     protected function chatBroadCast($chatId, $messageArray)
     {
         // sending messages
-        if ($this->chats[$chatId]) {
+        if (isset($this->chats[$chatId]) && is_array($this->chats[$chatId]) && count($this->chats[$chatId]) > 0) {
             foreach ($this->chats[$chatId] as $userConnections) {
-                if (isset($userConnections)) {
+                if (isset($userConnections) && is_array($userConnections) && count($userConnections) > 0) {
                     foreach ($userConnections as $key => $value) {
                         $this->clients[$key]['conn']->send($messageArray);
                     }
@@ -126,10 +217,8 @@ class SocketServer implements MessageComponentInterface
     protected function checkUserChatPresence($userId, $chatId)
     {
         if (isset($this->chats[$chatId]) && isset($this->chats[$chatId][$userId]) && count($this->chats[$chatId][$userId]) > 0) {
-            echo "user\n";
             return true;
         } else {
-            echo "no user\n";
             return false;
         }
     }

@@ -29,7 +29,6 @@ $().ready(function () {
         socket = new WebSocket('ws://' + location.host + ':8080');
 
         socket.onopen = function (event) {
-            console.log({'action': 'auth', 'chat_token': chatToken});
             socket.send(JSON.stringify({'action': 'auth', 'chat_token': chatToken}));
         };
 
@@ -41,6 +40,9 @@ $().ready(function () {
                     break;
                 case 'service':
                     $('#chat-messages').append(renderServiceMsg(response.message, response.date));
+                    break;
+                case 'termination':
+                    window.location.replace('/');
                     break;
             }
             // clear chat window
