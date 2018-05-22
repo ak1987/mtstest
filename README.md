@@ -19,6 +19,8 @@ Add database config to /config/db.php
 
 Import `sql1.sql` and `sql2.sql` files to your database.
 
+Launch socket via command line by command `php yii chat/start-socket`
+
 </p>
 
 <h2>About Yii2 basic template</h2>
