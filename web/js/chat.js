@@ -43,7 +43,18 @@ $().ready(function () {
                     $('#chat-messages').append(renderServiceMsg(response.message, response.date));
                     break;
             }
+            // clear chat window
+            $('#chat-new-message').val('');
+            // scroll
+            scrollDownChatWindow();
+
         };
+    }
+
+    function scrollDownChatWindow() {
+        var chatContainer = $('#chat-messages');
+        var height = chatContainer[0].scrollHeight;
+        chatContainer.scrollTop(height);
     }
 
     function sendMessage(messageText) {
@@ -83,6 +94,7 @@ $().ready(function () {
             },
             async: false
         });
+        scrollDownChatWindow();
     }
 
 });
