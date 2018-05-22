@@ -43,20 +43,21 @@ class ChatController extends Controller
      */
     public function actionIndex($id = null)
     {
-        $token =  Yii::$app->request->cookies->getValue('token');
-        if(!$token || !Users::getUserByToken($token)) {
+        $token = Yii::$app->request->cookies->getValue('token');
+        if (!$token || !Users::getUserByToken($token)) {
             return $this->redirect(['chat/register']);
         }
 
         if ($id) {
             if (intval($id) != $id) throw new NotFoundHttpException();
-            return $this->render('chat', ['chatId' => $id]);
+            return $this->render('chat', ['chatId' => $id, 'userToken' => $token]);
         } else {
             return $this->render('index');
         }
     }
 
-    public function actionRegister() {
+    public function actionRegister()
+    {
         $model = new RegisterForm();
         if ($model->load(Yii::$app->request->post()) && $model->validate()) {
             $user = new Users();
@@ -65,7 +66,8 @@ class ChatController extends Controller
             $user->save();
             Yii::$app->response->cookies->add(new \yii\web\Cookie([
                 'name' => 'token',
-                'value' => $user->token
+                'value' => $user->token,
+                'expire' => time() + 86400 * 365,
             ]));
             return $this->redirect(['chat/index']);
         }
@@ -78,7 +80,7 @@ class ChatController extends Controller
     {
         \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
         $response = [];
-        $messages = Messages::find()->with('user')->where(['chat_id' => $id])->orderBy('datetime',SORT_ASC)->all();
+        $messages = Messages::find()->with('user')->where(['chat_id' => $id])->orderBy('datetime', SORT_ASC)->all();
         foreach ($messages as $message) {
             $response[] = [
                 'user_id' => $message->user->id,

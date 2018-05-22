@@ -9,7 +9,9 @@ $().ready(function () {
 
     // SYNCHRONOUS REQUESTS
 
-    getChatToken(123, chatId);
+    var userToken = $('#user-token').val();
+
+    getChatToken(userToken, chatId);
 
     getChatMessages(chatId);
 
