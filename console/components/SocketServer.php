@@ -108,8 +108,10 @@ class SocketServer implements MessageComponentInterface
                 if (isset($this->chats) && count($this->chats) > 0) {
                     foreach ($this->chats as $chatId => $connections) {
                         foreach ($connections as $userId => $connection) {
-                            $list[$chatId][] = $userId;
-                            $userIds[] = $userId;
+                            if($connection) {
+                                $list[$chatId][] = $userId;
+                                $userIds[] = $userId;
+                            }
                         }
                     }
                 }
@@ -121,8 +123,8 @@ class SocketServer implements MessageComponentInterface
                     $namesArray[$userName['id']] = $userName['name'];
                 }
 
-                //var_dump($userNames);
-                //var_dump($list);
+                //var_dump($namesArray);
+                //var_dump($this->chats);
 
                 // mapping
 
@@ -130,9 +132,17 @@ class SocketServer implements MessageComponentInterface
 
                 if (count($list) > 0 && count($userNames) > 0) {
                     foreach ($list as $chatId => $item) {
+                        $userArray = [];
                         foreach ($item as $user) {
-                            $data[$chatId][$userId] = $namesArray[$userId];
+                            $userArray[] = [
+                                'id' => $user,
+                                'name' => $namesArray[$user],
+                            ];
                         }
+                        $data[] = [
+                            'chat_id' => $chatId,
+                            'user_list' => $userArray,
+                        ];
                     }
                 }
 
