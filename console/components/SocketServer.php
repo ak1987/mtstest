@@ -18,15 +18,19 @@ class SocketServer implements MessageComponentInterface
     {
         $this->clients[$conn->resourceId]['conn'] = $conn;
         echo "New connection! ({$conn->resourceId})\n";
+        $conn->send(json_encode([
+            'type' => 'connection_success',
+        ]));
     }
 
     public function onMessage(ConnectionInterface $from, $msg)
     {
         $connId = $from->resourceId; // connection id
         $data = json_decode($msg, true); // json data receive
-        switch ($data['action']) {
+        $action = (isset($data['action'])) ? $data['action'] : $data['type'];
+        switch ($action) {
             case 'auth':
-                $chatToken = $data['chat_token'];
+                $chatToken = (isset($data['chat_token'])) ? $data['chat_token'] : $data['message'];
                 $chatSession = ChatSessions::find()->where(['id' => $chatToken])->one();
                 if ($chatSession) {
                     $chatId = $chatSession->chat_id;
@@ -108,7 +112,7 @@ class SocketServer implements MessageComponentInterface
                 if (isset($this->chats) && count($this->chats) > 0) {
                     foreach ($this->chats as $chatId => $connections) {
                         foreach ($connections as $userId => $connection) {
-                            if($connection) {
+                            if ($connection) {
                                 $list[$chatId][] = $userId;
                                 $userIds[] = $userId;
                             }
