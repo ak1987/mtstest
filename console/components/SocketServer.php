@@ -63,7 +63,7 @@ class SocketServer implements MessageComponentInterface
                 $chatId = $this->clients[$connId]['chat_id'];
                 $messageText = $data['msg'];
                 // forming message
-
+                $messageText = htmlspecialchars($messageText);
                 $message = new Messages();
                 $message->user_id = $userId;
                 $message->chat_id = $chatId;
@@ -73,7 +73,7 @@ class SocketServer implements MessageComponentInterface
 
                 $messageArray = json_encode([
                     'type' => 'message',
-                    'message' => html_entity_decode($messageText),
+                    'message' => $messageText,
                     'user_id' => $userId,
                     'user_name' => Users::findOne($userId)->name,
                     'date' => $message->datetime,
